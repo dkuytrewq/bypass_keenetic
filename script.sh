@@ -6,7 +6,7 @@
 # Демо-бот: https://t.me/keenetic_dns_bot
 #
 # Файл: script.sh, Версия 2.2.0, последнее изменение: 24.09.2023, 22:32
-# Доработал: NetworK (https://github.com/ziwork)
+# Доработал: NetworK (https://github.com/dkuytrewq)
 
 # оригинальный репозиторий (tas-unn), FORK by NetworK (ziwork)
 
@@ -240,7 +240,7 @@ if [ "$1" = "-install" ]; then
 fi
 
 if [ "$1" = "-reinstall" ]; then
-    curl -s -o /opt/root/script.sh https://raw.githubusercontent.com/ziwork/bypass_keenetic/main/script.sh
+    curl -s -o /opt/root/script.sh https://raw.githubusercontent.com/dkuytrewq/bypass_keenetic/main/script.sh
     chmod 755 /opt/root/script.sh || chmod +x /opt/root/script.sh
     echo "Начинаем переустановку"
     #opkg update
