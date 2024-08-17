@@ -10,16 +10,13 @@
 
 # оригинальный репозиторий (tas-unn), FORK by NetworK (ziwork)
 
-repo="ziwork"
+repo="dkuytrewq"
 
 # ip роутера
 lanip=$(ip addr show br0 | grep -Po "(?<=inet ).*(?=/)" | awk '{print $1}')
 ssredir="ss-redir"
 localportsh=$(grep "localportsh" /opt/etc/bot_config.py | grep -Eo "[0-9]{1,5}")
-#dnsporttor=$(grep "dnsporttor" /opt/etc/bot_config.py | grep -Eo "[0-9]{1,5}")
-localporttor=$(grep "localporttor" /opt/etc/bot_config.py | grep -Eo "[0-9]{1,5}")
 localportvmess=$(grep "localportvmess" /opt/etc/bot_config.py | grep -Eo "[0-9]{1,5}")
-localporttrojan=$(grep "localporttrojan" /opt/etc/bot_config.py | grep -Eo "[0-9]{1,5}")
 dnsovertlsport=$(grep "dnsovertlsport" /opt/etc/bot_config.py | grep -Eo "[0-9]{1,5}")
 dnsoverhttpsport=$(grep "dnsoverhttpsport" /opt/etc/bot_config.py | grep -Eo "[0-9]{1,5}")
 keen_os_full=$(curl -s localhost:79/rci/show/version/title | tr -d \",)
@@ -28,13 +25,12 @@ keen_os_short=$(curl -s localhost:79/rci/show/version/title | tr -d \", | cut -b
 if [ "$1" = "-remove" ]; then
     echo "Начинаем удаление"
     # opkg remove curl mc tor tor-geoip bind-dig cron dnsmasq-full ipset iptables obfs4 shadowsocks-libev-ss-redir shadowsocks-libev-config
-    opkg remove tor tor-geoip bind-dig cron dnsmasq-full ipset iptables obfs4 shadowsocks-libev-ss-redir shadowsocks-libev-config v2ray trojan
+    # opkg remove tor tor-geoip bind-dig cron dnsmasq-full ipset iptables obfs4 shadowsocks-libev-ss-redir shadowsocks-libev-config v2ray trojan
+    curl remove bind-dig dnsmasq-full ipset iptables shadowsocks-libev-ss-redir shadowsocks-libev-config xray
     echo "Пакеты удалены, удаляем папки, файлы и настройки"
     ipset flush testset
-    ipset flush unblocktor
     ipset flush unblocksh
     ipset flush unblockvmess
-    ipset flush unblocktroj
     #ipset flush unblockvpn
     if ls -d /opt/etc/unblock/vpn-*.txt >/dev/null 2>&1; then
      for vpn_file_names in /opt/etc/unblock/vpn-*; do
@@ -45,12 +41,8 @@ if [ "$1" = "-remove" ]; then
      done
     fi
 
-    chmod 777 /opt/root/get-pip.py || rm -Rfv /opt/root/get-pip.py
-    chmod 777 /opt/etc/crontab || rm -Rfv /opt/etc/crontab
     chmod 777 /opt/etc/init.d/S22shadowsocks || rm -Rfv /opt/etc/init.d/S22shadowsocks
-    chmod 777 /opt/etc/init.d/S22trojan || rm -Rfv /opt/etc/init.d/S22trojan
-    chmod 777 /opt/etc/init.d/S24v2ray || rm -Rfv /opt/etc/init.d/S24v2ray
-    chmod 777 /opt/etc/init.d/S35tor || rm -Rfv /opt/etc/init.d/S35tor
+    chmod 777 /opt/etc/init.d/S24xray || rm -Rfv /opt/etc/init.d/S24xray
     chmod 777 /opt/etc/init.d/S56dnsmasq || rm -Rfv /opt/etc/init.d/S56dnsmasq
     chmod 777 /opt/etc/init.d/S99unblock || rm -Rfv /opt/etc/init.d/S99unblock
     chmod 777 /opt/etc/ndm/netfilter.d/100-redirect.sh || rm -rfv /opt/etc/ndm/netfilter.d/100-redirect.sh
@@ -61,11 +53,8 @@ if [ "$1" = "-remove" ]; then
     chmod 777 /opt/bin/unblock_ipset.sh || rm -rfv /opt/bin/unblock_ipset.sh
     chmod 777 /opt/etc/unblock.dnsmasq || rm -rfv /opt/etc/unblock.dnsmasq
     chmod 777 /opt/etc/dnsmasq.conf || rm -rfv /opt/etc/dnsmasq.conf
-    chmod 777 /opt/tmp/tor || rm -Rfv /opt/tmp/tor
     # chmod 777 /opt/etc/unblock || rm -Rfv /opt/etc/unblock
-    chmod 777 /opt/etc/tor || rm -Rfv /opt/etc/tor
-    chmod 777 /opt/etc/v2ray || rm -Rfv /opt/etc/v2ray
-    chmod 777 /opt/etc/trojan || rm -Rfv /opt/etc/trojan
+    chmod 777 /opt/etc/xray || rm -Rfv /opt/etc/xray
     echo "Созданные папки, файлы и настройки удалены"
     echo "Если вы хотите полностью отключить DNS Override, перейдите в меню Сервис -> DNS Override -> DNS Override ВЫКЛ. После чего включится встроенный (штатный) DNS и роутер перезагрузится."
     #echo "Отключаем opkg dns-override"
@@ -122,13 +111,6 @@ if [ "$1" = "-install" ]; then
     sed -i "s/hash:net/${set_type}/g" /opt/etc/ndm/fs.d/100-ipset.sh
     echo "Созданы файлы под множества"
 
-    # chmod 777 /opt/tmp/tor || rm -Rfv /opt/tmp/tor
-    # chmod 777 /opt/etc/tor/torrc || rm -Rfv /opt/etc/tor/torrc
-    mkdir -p /opt/tmp/tor
-    curl -o /opt/etc/tor/torrc https://raw.githubusercontent.com/${repo}/bypass_keenetic/main/torrc
-    sed -i "s/hash:net/${set_type}/g" /opt/etc/tor/torrc
-    echo "Установлены настройки Tor"
-
     # chmod 777 /opt/etc/shadowsocks.json || rm -Rfv /opt/etc/shadowsocks.json
     # chmod 777 /opt/etc/init.d/S22shadowsocks
     curl -o /opt/etc/shadowsocks.json https://raw.githubusercontent.com/${repo}/bypass_keenetic/main/shadowsocks.json
@@ -138,22 +120,19 @@ if [ "$1" = "-install" ]; then
     echo "Установлен параметр ss-redir для Shadowsocks"
 
     # chmod 777 /opt/etc/v2ray/config.json || rm -Rfv /opt/etc/v2ray/config.json
-    curl -o /opt/etc/v2ray/config.json https://raw.githubusercontent.com/${repo}/bypass_keenetic/main/vmessconfig.json
+    # curl -o /opt/etc/v2ray/config.json https://raw.githubusercontent.com/${repo}/bypass_keenetic/main/vmessconfig.json
 
     # chmod 777 /opt/etc/trojan/config.json || rm -Rfv /opt/etc/trojan/config.json
-    curl -o /opt/etc/trojan/config.json https://raw.githubusercontent.com/${repo}/bypass_keenetic/main/trojanconfig.json
-    chmod 755 /opt/etc/init.d/S24v2ray || chmod +x /opt/etc/init.d/S24v2ray
-    sed -i 's|ARGS="-confdir /opt/etc/v2ray"|ARGS="run -c /opt/etc/v2ray/config.json"|g' /opt/etc/init.d/S24v2ray > /dev/null 2>&1
+    chmod 755 /opt/etc/init.d/S24xray || chmod +x /opt/etc/init.d/S24xray
+    sed -i 's|ARGS="-confdir /opt/etc/xray"|ARGS="run -c /opt/etc/xray/config.json"|g' /opt/etc/init.d/S24xray > /dev/null 2>&1
 
     # unblock folder and files
     mkdir -p /opt/etc/unblock
     touch /opt/etc/hosts || chmod 0755 /opt/etc/hosts
     touch /opt/etc/unblock/shadowsocks.txt || chmod 0755 /opt/etc/unblock/shadowsocks.txt
-    touch /opt/etc/unblock/tor.txt || chmod 0755 /opt/etc/unblock/tor.txt
-    touch /opt/etc/unblock/trojan.txt || chmod 0755 /opt/etc/unblock/trojan.txt
     touch /opt/etc/unblock/vmess.txt || chmod 0755 /opt/etc/unblock/vmess.txt
     touch /opt/etc/unblock/vpn.txt || chmod 0755 /opt/etc/unblock/vpn.txt
-    echo "Созданы файлы под сайты и ip-адреса для обхода блокировок для SS, Tor, Trojan и v2ray, VPN"
+    echo "Созданы файлы под сайты и ip-адреса для обхода блокировок для SS, v2ray, VPN"
 
     # unblock_ipset.sh
     # chmod 777 /opt/bin/unblock_ipset.sh || rm -rfv /opt/bin/unblock_ipset.sh
@@ -189,10 +168,8 @@ if [ "$1" = "-install" ]; then
     sed -i "s/hash:net/${set_type}/g" /opt/etc/ndm/netfilter.d/100-redirect.sh
     sed -i "s/192.168.1.1/${lanip}/g" /opt/etc/ndm/netfilter.d/100-redirect.sh
     sed -i "s/1082/${localportsh}/g" /opt/etc/ndm/netfilter.d/100-redirect.sh
-    sed -i "s/9141/${localporttor}/g" /opt/etc/ndm/netfilter.d/100-redirect.sh
     sed -i "s/10810/${localportvmess}/g" /opt/etc/ndm/netfilter.d/100-redirect.sh
-    sed -i "s/10829/${localporttrojan}/g" /opt/etc/ndm/netfilter.d/100-redirect.sh
-    echo "Установлено перенаправление пакетов с адресатами из unblock в: Tor, Shadowsocks, VPN, Trojan, v2ray"
+    echo "Установлено перенаправление пакетов с адресатами из unblock в: Shadowsocks, v2ray, VPN"
 
     # VPN script
     # chmod 777 /opt/etc/ndm/ifstatechanged.d/100-unblock-vpn.sh || rm -rfv /opt/etc/ndm/ifstatechanged.d/100-unblock-vpn.sh
@@ -263,9 +240,7 @@ if [ "$1" = "-update" ]; then
     echo "Пакеты обновлены."
 
     /opt/etc/init.d/S22shadowsocks stop > /dev/null 2>&1
-    /opt/etc/init.d/S24v2ray stop > /dev/null 2>&1
-    /opt/etc/init.d/S22trojan stop > /dev/null 2>&1
-    /opt/etc/init.d/S35tor stop > /dev/null 2>&1
+    /opt/etc/init.d/S24xray stop > /dev/null 2>&1
     echo "Сервисы остановлены."
 
     now=$(date +"%Y.%m.%d.%H-%M")
@@ -290,10 +265,8 @@ if [ "$1" = "-update" ]; then
     sed -i "s/hash:net/${set_type}/g" /opt/etc/ndm/netfilter.d/100-redirect.sh
     sed -i "s/192.168.1.1/${lanip}/g" /opt/etc/ndm/netfilter.d/100-redirect.sh
     sed -i "s/1082/${localportsh}/g" /opt/etc/ndm/netfilter.d/100-redirect.sh
-    sed -i "s/9141/${localporttor}/g" /opt/etc/ndm/netfilter.d/100-redirect.sh
     sed -i "s/10810/${localportvmess}/g" /opt/etc/ndm/netfilter.d/100-redirect.sh
-    sed -i "s/10829/${localporttrojan}/g" /opt/etc/ndm/netfilter.d/100-redirect.sh
-    sed -i 's|ARGS="-confdir /opt/etc/v2ray"|ARGS="run -c /opt/etc/v2ray/config.json"|g' /opt/etc/init.d/S24v2ray > /dev/null 2>&1
+    sed -i 's|ARGS="-confdir /opt/etc/xray"|ARGS="run -c /opt/etc/xray/config.json"|g' /opt/etc/init.d/S24xray > /dev/null 2>&1
 
     if [ "${keen_os_short}" = "4" ]; then
       echo "KeenOS 4+";
@@ -326,9 +299,7 @@ if [ "$1" = "-update" ]; then
 
     /opt/etc/init.d/S56dnsmasq restart > /dev/null 2>&1
     /opt/etc/init.d/S22shadowsocks start > /dev/null 2>&1
-    /opt/etc/init.d/S24v2ray start > /dev/null 2>&1
-    /opt/etc/init.d/S22trojan start > /dev/null 2>&1
-    /opt/etc/init.d/S35tor start > /dev/null 2>&1
+    /opt/etc/init.d/S24xray start > /dev/null 2>&1
 
     bot_old_version=$(grep "ВЕРСИЯ" /opt/etc/bot_config.py | grep -Eo "[0-9].{1,}")
     bot_new_version=$(grep "ВЕРСИЯ" /opt/etc/bot.py | grep -Eo "[0-9].{1,}")
