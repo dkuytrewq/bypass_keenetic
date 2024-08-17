@@ -31,15 +31,10 @@ import json
 import bot_config as config
 
 token = config.token
-appapiid = config.appapiid
-appapihash = config.appapihash
 usernames = config.usernames
 routerip = config.routerip
 localportsh = config.localportsh
-localporttor = config.localporttor
-localporttrojan = config.localporttrojan
 localportvmess = config.localportvmess
-dnsporttor = config.dnsporttor
 dnsovertlsport = config.dnsovertlsport
 dnsoverhttpsport = config.dnsoverhttpsport
 
@@ -99,9 +94,7 @@ def bot_message(message):
             if message.text == '♻️ Перезагрузить сервисы' or message.text == 'Перезагрузить сервисы':
                 bot.send_message(message.chat.id, '🔄 Выполняется перезагрузка сервисов!', reply_markup=service)
                 os.system('/opt/etc/init.d/S22shadowsocks restart')
-                os.system('/opt/etc/init.d/S22trojan restart')
-                os.system('/opt/etc/init.d/S24v2ray restart')
-                os.system('/opt/etc/init.d/S35tor restart')
+                os.system('/opt/etc/init.d/S24xray restart')
                 bot.send_message(message.chat.id, '✅ Сервисы перезагружены!', reply_markup=service)
                 return
 
@@ -357,30 +350,7 @@ def bot_message(message):
                 bot.send_message(message.chat.id, '✅ Успешно обновлено', reply_markup=main)
                 # return
 
-            if level == 6:
-                tormanually(message.text)
-                os.system('/opt/etc/init.d/S35tor restart')
-                level = 0
-                bot.send_message(message.chat.id, '✅ Успешно обновлено', reply_markup=main)
-                # return
-
             if level == 8:
-                # значит это ключи и мосты
-                if message.text == 'Где брать ключи❔':
-                    url = "https://raw.githubusercontent.com/dkuytrewq/bypass_keenetic/main/keys.md"
-                    keys = requests.get(url).text
-                    bot.send_message(message.chat.id, keys, parse_mode='Markdown', disable_web_page_preview=True)
-                    level = 8
-
-                if message.text == 'Tor':
-                    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-                    item1 = types.KeyboardButton("Tor вручную")
-                    item2 = types.KeyboardButton("Tor через telegram")
-                    markup.add(item1, item2)
-                    back = types.KeyboardButton("🔙 Назад")
-                    markup.add(back)
-                    bot.send_message(message.chat.id, '✅ Добро пожаловать в меню Tor!', reply_markup=markup)
-
                 if message.text == 'Shadowsocks':
                     #bot.send_message(message.chat.id, "Скопируйте ключ сюда")
                     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
@@ -399,42 +369,11 @@ def bot_message(message):
                     bot.send_message(message.chat.id, "🔑 Скопируйте ключ сюда", reply_markup=markup)
                     return
 
-                if message.text == 'Trojan':
-                    #bot.send_message(message.chat.id, "Скопируйте ключ сюда")
-                    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-                    back = types.KeyboardButton("🔙 Назад")
-                    markup.add(back)
-                    level = 10
-                    bot.send_message(message.chat.id, "🔑 Скопируйте ключ сюда", reply_markup=markup)
-                    return
-
             if level == 9:
                 vmess(message.text)
-                os.system('/opt/etc/init.d/S24v2ray restart')
+                os.system('/opt/etc/init.d/S24xray restart')
                 level = 0
                 bot.send_message(message.chat.id, '✅ Успешно обновлено', reply_markup=main)
-
-            if level == 10:
-                trojan(message.text)
-                os.system('/opt/etc/init.d/S22trojan restart')
-                level = 0
-                bot.send_message(message.chat.id, '✅ Успешно обновлено', reply_markup=main)
-
-            if message.text == 'Tor вручную':
-                #bot.send_message(message.chat.id, "Скопируйте ключ сюда")
-                markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-                back = types.KeyboardButton("🔙 Назад")
-                markup.add(back)
-                level = 6
-                bot.send_message(message.chat.id, "🔑 Скопируйте ключ сюда", reply_markup=markup)
-                return
-
-            if message.text == 'Tor через telegram':
-                tor()
-                os.system('/opt/etc/init.d/S35tor restart')
-                level = 0
-                bot.send_message(message.chat.id, '✅ Успешно обновлено', reply_markup=main)
-                return
 
             if message.text == '🔰 Установка и удаление':
                 markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
@@ -460,7 +399,7 @@ def bot_message(message):
                 if message.text == "Оригинальная версия":
                     repo = "tas-unn"
                 else:
-                    repo = "ziwork"
+                    repo = "dkuytrewq"
 
                 # os.system("curl -s -o /opt/root/script.sh https://raw.githubusercontent.com/dkuytrewq/bypass_keenetic/main/script.sh")
                 url = "https://raw.githubusercontent.com/{0}/bypass_keenetic/main/script.sh".format(repo)
@@ -477,9 +416,7 @@ def bot_message(message):
                 bot.send_message(message.chat.id,
                                  "Установка завершена. Теперь нужно немного настроить роутер и перейти к "
                                  "спискам для разблокировок. "
-                                 "Ключи для Vmess, Shadowsocks и Trojan необходимо установить вручную, "
-                                 "ключи для Tor можно установить автоматически: "
-                                 "Ключи и Мосты -> Tor -> Tor через telegram.",
+                                 "Ключи для Vmess, Shadowsocks необходимо установить вручную",
                                  reply_markup=main)
 
                 bot.send_message(message.chat.id,
@@ -522,13 +459,8 @@ def bot_message(message):
                 level = 8
                 markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
                 item1 = types.KeyboardButton("Shadowsocks")
-                item2 = types.KeyboardButton("Tor")
-                item3 = types.KeyboardButton("Vmess")
-                item4 = types.KeyboardButton("Trojan")
-                item5 = types.KeyboardButton("Где брать ключи❔")
+                item2 = types.KeyboardButton("Vmess")
                 markup.add(item1, item2)
-                markup.add(item3, item4)
-                markup.add(item5)
                 back = types.KeyboardButton("🔙 Назад")
                 markup.add(back)
                 bot.send_message(message.chat.id, "🔑 Ключи и мосты", reply_markup=markup)
@@ -541,7 +473,7 @@ def bot_message(message):
         os.chmod(r"/opt/etc/error.log", 0o0755)
 
 def vmess(key):
-    # global appapiid, appapihash, password, localportvmess
+    # global password, localportvmess
     encodedkey = key[8:]
     s = base64.b64decode(encodedkey).decode('utf8').replace("'", '"')
     jsondata = json.loads(s)
@@ -562,23 +494,8 @@ def vmess(key):
     f.write(sh)
     f.close()
 
-def trojan(key):
-    # global appapiid, appapihash, password, localporttrojan
-    key = key.split('//')[1]
-    pw = key.split('@')[0]
-    key = key.replace(pw + "@", "", 1)
-    host = key.split(':')[0]
-    key = key.replace(host + ":", "", 1)
-    port = key.split('?')[0].split('#')[0]
-    f = open('/opt/etc/trojan/config.json', 'w')
-    sh = '{"run_type":"nat","local_addr":"::","local_port":' \
-         + str(localporttrojan) + ',"remote_addr":"' + host + '","remote_port":' + port + \
-         ',"password":["' + pw + '"],"ssl":{"verify":false,"verify_hostname":false}}'
-    f.write(sh)
-    f.close()
-
 def shadowsocks(key=None):
-    # global appapiid, appapihash, password, localportsh
+    # global password, localportsh
     encodedkey = str(key).split('//')[1].split('@')[0] + '=='
     password = str(str(base64.b64decode(encodedkey)[2:]).split(':')[1])[:-1]
     server = str(key).split('@')[1].split('/')[0].split(':')[0]
@@ -592,58 +509,6 @@ def shadowsocks(key=None):
          + str(localportsh) + ', "fast_open": false,    "ipv6_first": true}'
     f.write(sh)
     f.close()
-
-def tormanually(bridges):
-    # global localporttor, dnsporttor
-    f = open('/opt/etc/tor/torrc', 'w')
-    f.write('User root\n\
-PidFile /opt/var/run/tor.pid\n\
-ExcludeExitNodes {RU},{UA},{AM},{KG},{BY}\n\
-StrictNodes 1\n\
-TransPort 0.0.0.0:' + localporttor + '\n\
-ExitRelay 0\n\
-ExitPolicy reject *:*\n\
-ExitPolicy reject6 *:*\n\
-GeoIPFile /opt/share/tor/geoip\n\
-GeoIPv6File /opt/share/tor/geoip6\n\
-DataDirectory /opt/tmp/tor\n\
-VirtualAddrNetwork 10.254.0.0/16\n\
-DNSPort 127.0.0.1:' + dnsporttor + '\n\
-AutomapHostsOnResolve 1\n\
-UseBridges 1\n\
-ClientTransportPlugin obfs4 exec /opt/sbin/obfs4proxy managed\n' + bridges.replace("obfs4", "Bridge obfs4"))
-    f.close()
-
-def tor():
-    # global appapiid, appapihash
-    # global localporttor, dnsporttor
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    f = open('/opt/etc/tor/torrc', 'w')
-    with TelegramClient('GetBridgesBot', appapiid, appapihash) as client:
-        client.send_message('GetBridgesBot', '/bridges')
-    with TelegramClient('GetBridgesBot', appapiid, appapihash) as client:
-        for message1 in client.iter_messages('GetBridgesBot'):
-            f.write('User root\n\
-PidFile /opt/var/run/tor.pid\n\
-ExcludeExitNodes {RU},{UA},{AM},{KG},{BY}\n\
-StrictNodes 1\n\
-TransPort 0.0.0.0:' + localporttor + '\n\
-ExitRelay 0\n\
-ExitPolicy reject *:*\n\
-ExitPolicy reject6 *:*\n\
-GeoIPFile /opt/share/tor/geoip\n\
-GeoIPv6File /opt/share/tor/geoip6\n\
-DataDirectory /opt/tmp/tor\n\
-VirtualAddrNetwork 10.254.0.0/16\n\
-DNSPort 127.0.0.1:' + dnsporttor + '\n\
-AutomapHostsOnResolve 1\n\
-UseBridges 1\n\
-ClientTransportPlugin obfs4 exec /opt/sbin/obfs4proxy managed\n'
-                    + message1.text.replace("Your bridges:\n", "").replace("obfs4", "Bridge obfs4"))
-            f.close()
-            break
-
 
 # bot.polling(none_stop=True)
 try:
