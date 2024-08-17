@@ -1,8 +1,6 @@
 #!/bin/sh
-ipset flush unblocktor
 ipset flush unblocksh
 ipset flush unblockvmess
-ipset flush unblocktroj
 #ipset flush unblockvpn
 
 if ls -d /opt/etc/unblock/vpn-*.txt >/dev/null 2>&1; then
