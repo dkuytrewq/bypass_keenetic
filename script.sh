@@ -1,22 +1,12 @@
 #!/bin/sh
 
-# 2023. Keenetic DNS bot /  Проект: bypass_keenetic / Автор: tas_unn
-# GitHub: https://github.com/tas-unn/bypass_keenetic
-# Данный бот предназначен для управления обхода блокировок на роутерах Keenetic
-# Демо-бот: https://t.me/keenetic_dns_bot
-#
-# Файл: script.sh, Версия 2.2.0, последнее изменение: 24.09.2023, 22:32
-# Доработал: NetworK (https://github.com/dkuytrewq)
-
-# оригинальный репозиторий (tas-unn), FORK by NetworK (ziwork)
-
 repo="dkuytrewq"
 
 # ip роутера
 lanip=$(ip addr show br0 | grep -Po "(?<=inet ).*(?=/)" | awk '{print $1}')
 ssredir="ss-redir"
 localportsh=$(grep "localportsh" /opt/etc/bot_config.py | grep -Eo "[0-9]{1,5}")
-localportvmess=$(grep "localportvmess" /opt/etc/bot_config.py | grep -Eo "[0-9]{1,5}")
+localportvless=$(grep "localportvless" /opt/etc/bot_config.py | grep -Eo "[0-9]{1,5}")
 dnsovertlsport=$(grep "dnsovertlsport" /opt/etc/bot_config.py | grep -Eo "[0-9]{1,5}")
 dnsoverhttpsport=$(grep "dnsoverhttpsport" /opt/etc/bot_config.py | grep -Eo "[0-9]{1,5}")
 keen_os_full=$(curl -s localhost:79/rci/show/version/title | tr -d \",)
@@ -24,13 +14,11 @@ keen_os_short=$(curl -s localhost:79/rci/show/version/title | tr -d \", | cut -b
 
 if [ "$1" = "-remove" ]; then
     echo "Начинаем удаление"
-    # opkg remove curl mc tor tor-geoip bind-dig cron dnsmasq-full ipset iptables obfs4 shadowsocks-libev-ss-redir shadowsocks-libev-config
-    # opkg remove tor tor-geoip bind-dig cron dnsmasq-full ipset iptables obfs4 shadowsocks-libev-ss-redir shadowsocks-libev-config v2ray trojan
-    curl remove bind-dig dnsmasq-full ipset iptables shadowsocks-libev-ss-redir shadowsocks-libev-config xray
+    opkg remove bind-dig dnsmasq-full ipset iptables shadowsocks-libev-ss-redir shadowsocks-libev-config xray
     echo "Пакеты удалены, удаляем папки, файлы и настройки"
     ipset flush testset
     ipset flush unblocksh
-    ipset flush unblockvmess
+    ipset flush unblockvless
     #ipset flush unblockvpn
     if ls -d /opt/etc/unblock/vpn-*.txt >/dev/null 2>&1; then
      for vpn_file_names in /opt/etc/unblock/vpn-*; do
@@ -74,7 +62,7 @@ if [ "$1" = "-install" ]; then
     echo "Ваша версия KeenOS" "${keen_os_full}"
     opkg update
     # opkg install curl mc tor tor-geoip bind-dig cron dnsmasq-full ipset iptables obfs4 shadowsocks-libev-ss-redir shadowsocks-libev-config
-    # opkg install curl mc tor tor-geoip bind-dig cron dnsmasq-full ipset iptables obfs4 shadowsocks-libev-ss-redir shadowsocks-libev-config python3 python3-pip v2ray trojan
+    # opkg install curl mc tor tor-geoip bind-dig cron dnsmasq-full ipset iptables obfs4 shadowsocks-libev-ss-redir shadowsocks-libev-config python3 python3-pip xray trojan
     opkg install curl bind-dig cron dnsmasq-full ipset iptables shadowsocks-libev-ss-redir shadowsocks-libev-config python3 python3-pip xray
     curl -O https://bootstrap.pypa.io/get-pip.py
     sleep 3
@@ -89,7 +77,7 @@ if [ "$1" = "-install" ]; then
 
     #ipset flush unblocktor
     #ipset flush unblocksh
-    #ipset flush unblockvmess
+    #ipset flush unblockvless
     #ipset flush unblocktroj
     #ipset flush testset
     #ipset flush unblockvpn
@@ -119,8 +107,8 @@ if [ "$1" = "-install" ]; then
     chmod 0755 /opt/etc/shadowsocks.json || chmod 755 /opt/etc/init.d/S22shadowsocks || chmod +x /opt/etc/init.d/S22shadowsocks
     echo "Установлен параметр ss-redir для Shadowsocks"
 
-    # chmod 777 /opt/etc/v2ray/config.json || rm -Rfv /opt/etc/v2ray/config.json
-    # curl -o /opt/etc/v2ray/config.json https://raw.githubusercontent.com/${repo}/bypass_keenetic/main/vmessconfig.json
+    chmod 777 /opt/etc/xray/config.json || rm -Rfv /opt/etc/xray/config.json
+    curl -o /opt/etc/xray/config.json https://raw.githubusercontent.com/${repo}/bypass_keenetic/main/vlessconfig.json
 
     # chmod 777 /opt/etc/trojan/config.json || rm -Rfv /opt/etc/trojan/config.json
     chmod 755 /opt/etc/init.d/S24xray || chmod +x /opt/etc/init.d/S24xray
@@ -130,9 +118,9 @@ if [ "$1" = "-install" ]; then
     mkdir -p /opt/etc/unblock
     touch /opt/etc/hosts || chmod 0755 /opt/etc/hosts
     touch /opt/etc/unblock/shadowsocks.txt || chmod 0755 /opt/etc/unblock/shadowsocks.txt
-    touch /opt/etc/unblock/vmess.txt || chmod 0755 /opt/etc/unblock/vmess.txt
+    touch /opt/etc/unblock/vless.txt || chmod 0755 /opt/etc/unblock/vless.txt
     touch /opt/etc/unblock/vpn.txt || chmod 0755 /opt/etc/unblock/vpn.txt
-    echo "Созданы файлы под сайты и ip-адреса для обхода блокировок для SS, v2ray, VPN"
+    echo "Созданы файлы под сайты и ip-адреса для обхода блокировок для SS, xray, VPN"
 
     # unblock_ipset.sh
     # chmod 777 /opt/bin/unblock_ipset.sh || rm -rfv /opt/bin/unblock_ipset.sh
@@ -168,8 +156,8 @@ if [ "$1" = "-install" ]; then
     sed -i "s/hash:net/${set_type}/g" /opt/etc/ndm/netfilter.d/100-redirect.sh
     sed -i "s/192.168.1.1/${lanip}/g" /opt/etc/ndm/netfilter.d/100-redirect.sh
     sed -i "s/1082/${localportsh}/g" /opt/etc/ndm/netfilter.d/100-redirect.sh
-    sed -i "s/10810/${localportvmess}/g" /opt/etc/ndm/netfilter.d/100-redirect.sh
-    echo "Установлено перенаправление пакетов с адресатами из unblock в: Shadowsocks, v2ray, VPN"
+    sed -i "s/10810/${localportvless}/g" /opt/etc/ndm/netfilter.d/100-redirect.sh
+    echo "Установлено перенаправление пакетов с адресатами из unblock в: Shadowsocks, xray, VPN"
 
     # VPN script
     # chmod 777 /opt/etc/ndm/ifstatechanged.d/100-unblock-vpn.sh || rm -rfv /opt/etc/ndm/ifstatechanged.d/100-unblock-vpn.sh
@@ -218,7 +206,7 @@ if [ "$1" = "-install" ]; then
 fi
 
 if [ "$1" = "-reinstall" ]; then
-    curl -s -o /opt/root/script.sh https://raw.githubusercontent.com/dkuytrewq/bypass_keenetic/main/script.sh
+    curl -s -o /opt/root/script.sh https://raw.githubusercontent.com/${repo}/bypass_keenetic/main/script.sh
     chmod 755 /opt/root/script.sh || chmod +x /opt/root/script.sh
     echo "Начинаем переустановку"
     #opkg update
@@ -265,7 +253,7 @@ if [ "$1" = "-update" ]; then
     sed -i "s/hash:net/${set_type}/g" /opt/etc/ndm/netfilter.d/100-redirect.sh
     sed -i "s/192.168.1.1/${lanip}/g" /opt/etc/ndm/netfilter.d/100-redirect.sh
     sed -i "s/1082/${localportsh}/g" /opt/etc/ndm/netfilter.d/100-redirect.sh
-    sed -i "s/10810/${localportvmess}/g" /opt/etc/ndm/netfilter.d/100-redirect.sh
+    sed -i "s/10810/${localportvless}/g" /opt/etc/ndm/netfilter.d/100-redirect.sh
     sed -i 's|ARGS="-confdir /opt/etc/xray"|ARGS="run -c /opt/etc/xray/config.json"|g' /opt/etc/init.d/S24xray > /dev/null 2>&1
 
     if [ "${keen_os_short}" = "4" ]; then

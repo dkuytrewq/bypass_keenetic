@@ -1,7 +1,7 @@
 #!/bin/sh
 [ "$1" != "start" ] && exit 0
 ipset create unblocksh hash:net -exist
-ipset create unblockvmess hash:net -exist
+ipset create unblockvless hash:net -exist
 # ipset create unblockvpn hash:net -exist
 
 if ls -d /opt/etc/unblock/vpn-*.txt >/dev/null 2>&1; then
@@ -12,14 +12,4 @@ ipset create "$unblockvpn" hash:net -exist
 done
 fi
 
-#script0
-#script1
-#script2
-#script3
-#script4
-#script5
-#script6
-#script7
-#script8
-#script9
 exit 0

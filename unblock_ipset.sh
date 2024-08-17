@@ -53,27 +53,27 @@ while read -r line || [ -n "$line" ]; do
   cidr=$(echo "$line" | grep -Eo '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}/[0-9]{1,2}' | cut_local)
 
   if [ -n "$cidr" ]; then
-    ipset -exist add unblockvmess "$cidr"
+    ipset -exist add unblockvless "$cidr"
     continue
   fi
 
   range=$(echo "$line" | grep -Eo '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}-[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' | cut_local)
 
   if [ -n "$range" ]; then
-    ipset -exist add unblockvmess "$range"
+    ipset -exist add unblockvless "$range"
     continue
   fi
 
   addr=$(echo "$line" | grep -Eo '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' | cut_local)
 
   if [ -n "$addr" ]; then
-    ipset -exist add unblockvmess "$addr"
+    ipset -exist add unblockvless "$addr"
     continue
   fi
 
-  dig +short "$line" @localhost -p 40500 | grep -Eo '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' | awk '{system("ipset -exist add unblockvmess "$1)}'
+  dig +short "$line" @localhost -p 40500 | grep -Eo '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' | awk '{system("ipset -exist add unblockvless "$1)}'
 
-done < /opt/etc/unblock/vmess.txt
+done < /opt/etc/unblock/vless.txt
 
 
 if ls -d /opt/etc/unblock/vpn-*.txt >/dev/null 2>&1; then

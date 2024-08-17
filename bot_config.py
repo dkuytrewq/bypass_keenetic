@@ -10,7 +10,7 @@ vpn_allowed="IKE|SSTP|OpenVPN|Wireguard|L2TP"
 
 # следующие настройки могут быть оставлены по умолчанию, но можно будет что-то поменять
 localportsh = '1082'  # локальный порт для shadowsocks
-localportvmess = '10810'  # локальный порт для vmess
+localportvless = '10810'  # локальный порт для vless
 dnsovertlsport = '40500'  # можно посмотреть номер порта командой "cat /tmp/ndnproxymain.stat"
 dnsoverhttpsport = '40508'  # можно посмотреть номер порта командой "cat /tmp/ndnproxymain.stat"
 

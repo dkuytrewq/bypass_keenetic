@@ -1,13 +1,5 @@
 #!/bin/sh
 
-# 2023. Keenetic DNS bot /  Проект: bypass_keenetic / Автор: tas_unn
-# GitHub: https://github.com/tas-unn/bypass_keenetic
-# Данный бот предназначен для управления обхода блокировок на роутерах Keenetic
-# Демо-бот: https://t.me/keenetic_dns_bot
-#
-# Файл: 100-unblock-vpn-v4.sh, Версия 2.2.0, последнее изменение: 01.10.2023, 18:58
-# Автор файла: NetworK (https://github.com/dkuytrewq)
-
 TAG="100-unblock-vpn.sh"
 
 sleep 1

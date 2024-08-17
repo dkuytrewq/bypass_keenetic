@@ -1,15 +1,5 @@
 #!/bin/sh
 
-# 2023. Keenetic DNS bot /  Проект: bypass_keenetic / Автор: tas_unn
-# GitHub: https://github.com/tas-unn/bypass_keenetic
-# Данный бот предназначен для управления обхода блокировок на роутерах Keenetic
-# Демо-бот: https://t.me/keenetic_dns_bot
-#
-# Файл: 100-redirect.sh, Версия 2.1.9, последнее изменение: 03.05.2023, 21:10
-# Доработал: NetworK (https://github.com/dkuytrewq)
-
-#!/bin/sh
-
 # shellcheck disable=SC2154
 [ "$type" = "ip6tables" ] && exit 0
 [ "$table" != "mangle" ] && [ "$table" != "nat" ] && exit 0
@@ -74,18 +64,10 @@ if [ -z "$(iptables-save 2>/dev/null | grep unblocksh)" ]; then
 fi
 
 
-if [ -z "$(iptables-save 2>/dev/null | grep unblockvmess)" ]; then
-  ipset create unblockvmess hash:net -exist 2>/dev/null
-	iptables -I PREROUTING -w -t nat -p tcp -m set --match-set unblockvmess dst -j REDIRECT --to-port 10810
-	iptables -I PREROUTING -w -t nat -p udp -m set --match-set unblockvmess dst -j REDIRECT --to-port 10810
-
-	#iptables -I PREROUTING -w -t nat -i br0 -p tcp -m set --match-set unblockvmess dst -j REDIRECT --to-port 10810
-	#iptables -I PREROUTING -w -t nat -i br0 -p udp -m set --match-set unblockvmess dst -j REDIRECT --to-port 10810
-	#iptables -A PREROUTING -w -t nat -i br0 -p tcp -m set --match-set unblockvmess dst -j REDIRECT --to-port 10810 #в целом не имеет смысла
-
-	#iptables -I PREROUTING -w -t nat -i sstp0 -p tcp -m set --match-set unblockvmess dst -j REDIRECT --to-port 10810
-	#iptables -I PREROUTING -w -t nat -i sstp0 -p udp -m set --match-set unblockvmess dst -j REDIRECT --to-port 10810
-	#iptables -A PREROUTING -w -t nat -i sstp0 -p tcp -m set --match-set unblockvmess dst -j REDIRECT --to-port 10810 #в целом не имеет смысла
+if [ -z "$(iptables-save 2>/dev/null | grep unblockvless)" ]; then
+  ipset create unblockvless hash:net -exist 2>/dev/null
+	iptables -I PREROUTING -w -t nat -p tcp -m set --match-set unblockvless dst -j REDIRECT --to-port 10810
+	iptables -I PREROUTING -w -t nat -p udp -m set --match-set unblockvless dst -j REDIRECT --to-port 10810
 fi
 
 

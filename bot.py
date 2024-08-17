@@ -1,18 +1,5 @@
 #!/usr/bin/python3
 
-#  2023. Keenetic DNS bot /  Проект: bypass_keenetic / Автор: tas_unn
-#  GitHub: https://github.com/tas-unn/bypass_keenetic
-#  Данный бот предназначен для управления обхода блокировок на роутерах Keenetic
-#  Демо-бот: https://t.me/keenetic_dns_bot
-#
-#  Файл: bot.py, Версия 2.2.1, последнее изменение: 02.10.2023, 00:55
-#  Доработал: NetworK (https://github.com/dkuytrewq)
-
-# ВЕРСИЯ СКРИПТА 2.2.1
-# ЕСЛИ ВЫ ХОТИТЕ ПОДДЕРЖАТЬ РАЗРАБОТЧИКОВ - МОЖЕТЕ ОТПРАВИТЬ ДОНАТ НА ЛЮБУЮ СУММУ
-# ziwork aka NetworK - 4817 7603 0990 8527 (Сбербанк VISA)
-# tas-unn aka Materland - 2204 1201 0098 8217 (КАРТА МИР)
-
 import asyncio
 import subprocess
 import os
@@ -34,9 +21,11 @@ token = config.token
 usernames = config.usernames
 routerip = config.routerip
 localportsh = config.localportsh
-localportvmess = config.localportvmess
+localportvless = config.localportvless
 dnsovertlsport = config.dnsovertlsport
 dnsoverhttpsport = config.dnsoverhttpsport
+
+repo = "dkuytrewq"
 
 # Начало работы программы
 bot = telebot.TeleBot(token)
@@ -140,20 +129,20 @@ def bot_message(message):
                 return
 
             if message.text == '📄 Информация':
-                url = "https://raw.githubusercontent.com/dkuytrewq/bypass_keenetic/main/info.md"
+                url = "https://raw.githubusercontent.com/" + repo + "/bypass_keenetic/main/info.md"
                 info_bot = requests.get(url).text
                 bot.send_message(message.chat.id, info_bot, parse_mode='Markdown', disable_web_page_preview=True,
                                  reply_markup=main)
                 return
 
             if message.text == '/keys_free':
-                url = "https://raw.githubusercontent.com/dkuytrewq/bypass_keenetic/main/keys.md"
+                url = "https://raw.githubusercontent.com/" + repo + "/bypass_keenetic/main/keys.md"
                 keys_free = requests.get(url).text
                 bot.send_message(message.chat.id, keys_free, parse_mode='Markdown', disable_web_page_preview=True)
                 return
 
             if message.text == '🔄 Обновления' or message.text == '/check_update':
-                url = "https://raw.githubusercontent.com/dkuytrewq/bypass_keenetic/main/version.md"
+                url = "https://raw.githubusercontent.com/" + repo + "/bypass_keenetic/main/version.md"
                 bot_new_version = requests.get(url).text
 
                 with open('/opt/etc/bot.py', encoding='utf-8') as file:
@@ -174,7 +163,7 @@ def bot_message(message):
 
             if message.text == '/update':
                 bot.send_message(message.chat.id, 'Устанавливаются обновления, подождите!', reply_markup=service)
-                os.system("curl -s -o /opt/root/script.sh https://raw.githubusercontent.com/dkuytrewq/bypass_keenetic/main/script.sh")
+                os.system("curl -s -o /opt/root/script.sh https://raw.githubusercontent.com/" + repo + "/bypass_keenetic/main/script.sh")
                 os.chmod(r"/opt/root/script.sh", 0o0755)
                 os.chmod('/opt/root/script.sh', stat.S_IRWXU)
 
@@ -251,9 +240,8 @@ def bot_message(message):
                                  "Введите имя сайта или домена для разблокировки, "
                                  "либо воспользуйтесь меню для других действий")
                 markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-                item1 = types.KeyboardButton("Добавить обход блокировок соцсетей")
                 back = types.KeyboardButton("🔙 Назад")
-                markup.add(item1, back)
+                markup.add(back)
                 level = 3
                 bot.send_message(message.chat.id, "Меню " + bypass, reply_markup=markup)
                 return
@@ -276,18 +264,10 @@ def bot_message(message):
                     mylist.add(line.replace('\n', ''))
                 f.close()
                 k = len(mylist)
-                if message.text == "Добавить обход блокировок соцсетей":
-                    url = "https://raw.githubusercontent.com/tas-unn/bypass_keenetic/main/socialnet.txt"
-                    s = requests.get(url).text
-                    lst = s.split('\n')
-                    for line in lst:
-                        if len(line) > 1:
-                            mylist.add(line.replace('\n', ''))
-                else:
-                    if len(message.text) > 1:
-                        mas = message.text.split('\n')
-                        for site in mas:
-                            mylist.add(site)
+                if len(message.text) > 1:
+                    mas = message.text.split('\n')
+                    for site in mas:
+                        mylist.add(site)
                 sortlist = []
                 for line in mylist:
                     sortlist.append(line)
@@ -360,7 +340,7 @@ def bot_message(message):
                     bot.send_message(message.chat.id, "🔑 Скопируйте ключ сюда", reply_markup=markup)
                     return
 
-                if message.text == 'Vmess':
+                if message.text == 'Vless':
                     #bot.send_message(message.chat.id, "Скопируйте ключ сюда")
                     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
                     back = types.KeyboardButton("🔙 Назад")
@@ -370,7 +350,7 @@ def bot_message(message):
                     return
 
             if level == 9:
-                vmess(message.text)
+                vless(message.text)
                 os.system('/opt/etc/init.d/S24xray restart')
                 level = 0
                 bot.send_message(message.chat.id, '✅ Успешно обновлено', reply_markup=main)
@@ -387,26 +367,19 @@ def bot_message(message):
 
             if message.text == '♻️ Установка & переустановка':
                 markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-                item1 = types.KeyboardButton("Оригинальная версия")
-                item2 = types.KeyboardButton("Fork by NetworK")
+                item1 = types.KeyboardButton("Fork by dkuytrewq")
                 back = types.KeyboardButton("🔙 Назад")
-                markup.row(item1, item2)
+                markup.row(item1)
                 markup.row(back)
                 bot.send_message(message.chat.id, 'Выберите репозиторий', reply_markup=markup)
                 return
 
-            if message.text == "Оригинальная версия" or message.text == "Fork by NetworK":
-                if message.text == "Оригинальная версия":
-                    repo = "tas-unn"
-                else:
-                    repo = "dkuytrewq"
+            if message.text == "Fork by NetworK":
 
-                # os.system("curl -s -o /opt/root/script.sh https://raw.githubusercontent.com/dkuytrewq/bypass_keenetic/main/script.sh")
-                url = "https://raw.githubusercontent.com/{0}/bypass_keenetic/main/script.sh".format(repo)
+                url = "https://raw.githubusercontent.com/" + repo + "/bypass_keenetic/main/script.sh".format(repo)
                 os.system("curl -s -o /opt/root/script.sh " + url + "")
                 os.chmod(r"/opt/root/script.sh", 0o0755)
                 os.chmod('/opt/root/script.sh', stat.S_IRWXU)
-                #os.system("sed -i 's/dkuytrewq/" + repo + "/g' /opt/root/script.sh")
 
                 install = subprocess.Popen(['/opt/root/script.sh', '-install'], stdout=subprocess.PIPE)
                 for line in install.stdout:
@@ -416,7 +389,7 @@ def bot_message(message):
                 bot.send_message(message.chat.id,
                                  "Установка завершена. Теперь нужно немного настроить роутер и перейти к "
                                  "спискам для разблокировок. "
-                                 "Ключи для Vmess, Shadowsocks необходимо установить вручную",
+                                 "Ключи для Vless, Shadowsocks необходимо установить вручную",
                                  reply_markup=main)
 
                 bot.send_message(message.chat.id,
@@ -429,7 +402,7 @@ def bot_message(message):
                 return
 
             if message.text == '⚠️ Удаление':
-                os.system("curl -s -o /opt/root/script.sh https://raw.githubusercontent.com/dkuytrewq/bypass_keenetic/main/script.sh")
+                os.system("curl -s -o /opt/root/script.sh https://raw.githubusercontent.com/" + repo + "/bypass_keenetic/main/script.sh")
                 os.chmod(r"/opt/root/script.sh", 0o0755)
                 os.chmod('/opt/root/script.sh', stat.S_IRWXU)
 
@@ -459,7 +432,7 @@ def bot_message(message):
                 level = 8
                 markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
                 item1 = types.KeyboardButton("Shadowsocks")
-                item2 = types.KeyboardButton("Vmess")
+                item2 = types.KeyboardButton("Vless")
                 markup.add(item1, item2)
                 back = types.KeyboardButton("🔙 Назад")
                 markup.add(back)
@@ -472,17 +445,17 @@ def bot_message(message):
         file.close()
         os.chmod(r"/opt/etc/error.log", 0o0755)
 
-def vmess(key):
-    # global password, localportvmess
+def vless(key):
+    # global password, localportvless
     encodedkey = key[8:]
     s = base64.b64decode(encodedkey).decode('utf8').replace("'", '"')
     jsondata = json.loads(s)
-    f = open('/opt/etc/v2ray/config.json', 'w')
-    sh = '{"log":{"access":"/opt/etc/v2ray/access.log","error":"/opt/etc/v2ray/error.log","loglevel":"info"},' \
-         '"inbounds":[{"port":' + str(localportvmess) + ',"listen":"::","protocol":"dokodemo-door",' \
+    f = open('/opt/etc/xray/config.json', 'w')
+    sh = '{"log":{"access":"/opt/etc/xray/access.log","error":"/opt/etc/xray/error.log","loglevel":"info"},' \
+         '"inbounds":[{"port":' + str(localportvless) + ',"listen":"::","protocol":"dokodemo-door",' \
          '"settings":{"network":"tcp","followRedirect":true},'\
          '"sniffing":{"enabled":true,"destOverride":["http","tls"]}}],' \
-         '"outbounds":[{"tag":"proxy","domainStrategy":"UseIPv4","protocol":"vmess",' \
+         '"outbounds":[{"tag":"proxy","domainStrategy":"UseIPv4","protocol":"vless",' \
          '"settings":{"vnext":[{"address":"' + str(jsondata["add"]) + '","port":' + str(jsondata["port"]) + ',' \
          '"users":[{"id":"' + str(jsondata["id"]) + '","alterId":' + str(jsondata["aid"]) + ',' \
          '"email":"t@t.tt","security":"auto"}]}]},"streamSettings":{"network":"' + str(jsondata["net"]) + '",' \
