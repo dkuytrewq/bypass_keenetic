@@ -14,16 +14,14 @@ keen_os_short=$(curl -s localhost:79/rci/show/version/title | tr -d \", | cut -b
 
 if [ "$1" = "-remove" ]; then
     echo "Начинаем удаление"
-    opkg remove bind-dig dnsmasq-full ipset iptables shadowsocks-libev-ss-redir shadowsocks-libev-config xray
+    opkg remove bind-dig cron dnsmasq-full ipset iptables shadowsocks-libev-ss-redir shadowsocks-libev-config xray
     echo "Пакеты удалены, удаляем папки, файлы и настройки"
     ipset flush testset
     ipset flush unblocksh
     ipset flush unblockvless
-    #ipset flush unblockvpn
     if ls -d /opt/etc/unblock/vpn-*.txt >/dev/null 2>&1; then
      for vpn_file_names in /opt/etc/unblock/vpn-*; do
      vpn_file_name=$(echo "$vpn_file_names" | awk -F '/' '{print $5}' | sed 's/.txt//')
-     # shellcheck disable=SC2116
      unblockvpn=$(echo unblock"$vpn_file_name")
      ipset flush "$unblockvpn"
      done
@@ -41,7 +39,6 @@ if [ "$1" = "-remove" ]; then
     chmod 777 /opt/bin/unblock_ipset.sh || rm -rfv /opt/bin/unblock_ipset.sh
     chmod 777 /opt/etc/unblock.dnsmasq || rm -rfv /opt/etc/unblock.dnsmasq
     chmod 777 /opt/etc/dnsmasq.conf || rm -rfv /opt/etc/dnsmasq.conf
-    # chmod 777 /opt/etc/unblock || rm -Rfv /opt/etc/unblock
     chmod 777 /opt/etc/xray || rm -Rfv /opt/etc/xray
     echo "Созданные папки, файлы и настройки удалены"
     echo "Если вы хотите полностью отключить DNS Override, перейдите в меню Сервис -> DNS Override -> DNS Override ВЫКЛ. После чего включится встроенный (штатный) DNS и роутер перезагрузится."
@@ -160,7 +157,6 @@ if [ "$1" = "-reinstall" ]; then
     curl -s -o /opt/root/script.sh https://raw.githubusercontent.com/${repo}/bypass_keenetic/main/script.sh
     chmod 755 /opt/root/script.sh || chmod +x /opt/root/script.sh
     echo "Начинаем переустановку"
-    #opkg update
     echo "Удаляем установленные пакеты и созданные файлы"
     /bin/sh /opt/root/script.sh -remove
     echo "Удаление завершено"
@@ -174,7 +170,6 @@ fi
 if [ "$1" = "-update" ]; then
     echo "Начинаем обновление."
     opkg update > /dev/null 2>&1
-    # opkg update
     echo "Ваша версия KeenOS" "${keen_os_full}."
     echo "Пакеты обновлены."
 
@@ -192,6 +187,7 @@ if [ "$1" = "-update" ]; then
     mv /opt/etc/ndm/ifstatechanged.d/100-unblock-vpn.sh /opt/root/backup-"${now}"/100-unblock-vpn.sh
     mv /opt/etc/ndm/netfilter.d/100-redirect.sh /opt/root/backup-"${now}"/100-redirect.sh
     mv /opt/etc/bot.py /opt/root/backup-"${now}"/bot.py
+    mv /opt/etc/bot_config.py /opt/root/backup-"${now}"/bot_config.py
     rm -R /opt/etc/ndm/ifstatechanged.d/100-unblock-vpn > /dev/null 2>&1
     chmod 755 /opt/root/backup-"${now}"/*
     echo "Бэкап создан."
@@ -248,8 +244,6 @@ if [ "$1" = "-update" ]; then
     sed -i "s/${bot_old_version}/${bot_new_version}/g" /opt/etc/bot_config.py
     echo "Обновление выполнено. Сервисы перезапущены. Сейчас будет перезапущен бот (~15-30 сек)."
     sleep 7
-    # shellcheck disable=SC2009
-    # bot=$(ps | grep bot.py | awk '{print $1}' | head -1)
     bot_pid=$(ps | grep bot.py | awk '{print $1}')
     for bot in ${bot_pid}; do kill "${bot}"; done
     sleep 5
@@ -287,22 +281,8 @@ if [ "$1" = "-help" ]; then
 fi
 
 if [ -z "$1" ]; then
-    #echo not found "$1".
     echo "-install - use for install all needs for work"
     echo "-remove - use for remove all files script"
     echo "-update - use for get update files"
     echo "-reinstall - use for reinstall all files script"
 fi
-
-#if [ -n "$1" ]; then
-#    echo not found "$1".
-#    echo "-install - use for install all needs for work"
-#    echo "-remove - use for remove all files script"
-#    echo "-update - use for get update files"
-#    echo "-reinstall - use for reinstall all files script"
-#else
-#    echo "-install - use for install all needs for work"
-#    echo "-remove - use for remove all files script"
-#    echo "-update - use for get update files"
-#    echo "-reinstall - use for reinstall all files script"
-#fi
