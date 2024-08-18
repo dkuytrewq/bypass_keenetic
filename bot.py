@@ -1,5 +1,7 @@
 #!/usr/bin/python3
 
+# ВЕРСИЯ СКРИПТА 2.2.2
+
 import asyncio
 import subprocess
 import os
@@ -10,9 +12,6 @@ import telebot
 from telebot import types
 from telethon.sync import TelegramClient
 import base64
-# from pathlib import Path
-# import shutil
-# import datetime
 import requests
 import json
 import bot_config as config
