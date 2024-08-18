@@ -45,15 +45,6 @@ if [ "$1" = "-remove" ]; then
     chmod 777 /opt/etc/xray || rm -Rfv /opt/etc/xray
     echo "Созданные папки, файлы и настройки удалены"
     echo "Если вы хотите полностью отключить DNS Override, перейдите в меню Сервис -> DNS Override -> DNS Override ВЫКЛ. После чего включится встроенный (штатный) DNS и роутер перезагрузится."
-    #echo "Отключаем opkg dns-override"
-    #ndmc -c 'no opkg dns-override'
-    #sleep 3
-    #echo "Сохраняем конфигурацию на роутере"
-    #ndmc -c 'system configuration save'
-    #sleep 3
-    #echo "Перезагрузка роутера"
-    #sleep 3
-    #ndmc -c 'system reboot'
     exit 0
 fi
 
@@ -61,26 +52,8 @@ if [ "$1" = "-install" ]; then
     echo "Начинаем установку"
     echo "Ваша версия KeenOS" "${keen_os_full}"
     opkg update
-    # opkg install curl mc tor tor-geoip bind-dig cron dnsmasq-full ipset iptables obfs4 shadowsocks-libev-ss-redir shadowsocks-libev-config
-    # opkg install curl mc tor tor-geoip bind-dig cron dnsmasq-full ipset iptables obfs4 shadowsocks-libev-ss-redir shadowsocks-libev-config python3 python3-pip xray trojan
-    opkg install curl bind-dig cron dnsmasq-full ipset iptables shadowsocks-libev-ss-redir shadowsocks-libev-config python3 python3-pip xray
-    curl -O https://bootstrap.pypa.io/get-pip.py
-    sleep 3
-    python get-pip.py
-    pip install pyTelegramBotAPI telethon
-    #pip install telethon
-    #pip install pathlib
-    #pip install --upgrade pip
-    #pip install pytelegrambotapi
-    #pip install paramiko
+    opkg install curl nano-full bind-dig cron dnsmasq-full ipset iptables shadowsocks-libev-ss-redir shadowsocks-libev-config xray
     echo "Установка пакетов завершена. Продолжаем установку"
-
-    #ipset flush unblocktor
-    #ipset flush unblocksh
-    #ipset flush unblockvless
-    #ipset flush unblocktroj
-    #ipset flush testset
-    #ipset flush unblockvpn
 
     # есть поддержка множества hash:net или нет, если нет, то при этом вы потеряете возможность разблокировки по диапазону и CIDR
     set_type="hash:net"
@@ -92,15 +65,11 @@ if [ "$1" = "-install" ]; then
 
     echo "Переменные роутера найдены"
     # создания множеств IP-адресов unblock
-    # rm -rf /opt/etc/ndm/fs.d/100-ipset.sh
-    # chmod 777 /opt/etc/nmd/fs.d/100-ipset.sh || rm -rfv /opt/etc/nmd/fs.d/100-ipset.sh
     curl -o /opt/etc/ndm/fs.d/100-ipset.sh https://raw.githubusercontent.com/${repo}/bypass_keenetic/main/100-ipset.sh
     chmod 755 /opt/etc/ndm/fs.d/100-ipset.sh || chmod +x /opt/etc/ndm/fs.d/100-ipset.sh
     sed -i "s/hash:net/${set_type}/g" /opt/etc/ndm/fs.d/100-ipset.sh
     echo "Созданы файлы под множества"
 
-    # chmod 777 /opt/etc/shadowsocks.json || rm -Rfv /opt/etc/shadowsocks.json
-    # chmod 777 /opt/etc/init.d/S22shadowsocks
     curl -o /opt/etc/shadowsocks.json https://raw.githubusercontent.com/${repo}/bypass_keenetic/main/shadowsocks.json
     echo "Установлены настройки Shadowsocks"
     sed -i "s/ss-local/${ssredir}/g" /opt/etc/init.d/S22shadowsocks
@@ -110,7 +79,6 @@ if [ "$1" = "-install" ]; then
     chmod 777 /opt/etc/xray/config.json || rm -Rfv /opt/etc/xray/config.json
     curl -o /opt/etc/xray/config.json https://raw.githubusercontent.com/${repo}/bypass_keenetic/main/vlessconfig.json
 
-    # chmod 777 /opt/etc/trojan/config.json || rm -Rfv /opt/etc/trojan/config.json
     chmod 755 /opt/etc/init.d/S24xray || chmod +x /opt/etc/init.d/S24xray
     sed -i 's|ARGS="-confdir /opt/etc/xray"|ARGS="run -c /opt/etc/xray/config.json"|g' /opt/etc/init.d/S24xray > /dev/null 2>&1
 
@@ -123,14 +91,12 @@ if [ "$1" = "-install" ]; then
     echo "Созданы файлы под сайты и ip-адреса для обхода блокировок для SS, xray, VPN"
 
     # unblock_ipset.sh
-    # chmod 777 /opt/bin/unblock_ipset.sh || rm -rfv /opt/bin/unblock_ipset.sh
     curl -o /opt/bin/unblock_ipset.sh https://raw.githubusercontent.com/${repo}/bypass_keenetic/main/unblock_ipset.sh
     chmod 755 /opt/bin/unblock_ipset.sh || chmod +x /opt/bin/unblock_ipset.sh
     sed -i "s/40500/${dnsovertlsport}/g" /opt/bin/unblock_ipset.sh
     echo "Установлен скрипт для заполнения множеств unblock IP-адресами заданного списка доменов"
 
     # unblock_dnsmasq.sh
-    # chmod 777 /opt/bin/unblock_dnsmasq.sh || rm -rfv /opt/bin/unblock_dnsmasq.sh
     curl -o /opt/bin/unblock_dnsmasq.sh https://raw.githubusercontent.com/${repo}/bypass_keenetic/main/unblock.dnsmasq
     chmod 755 /opt/bin/unblock_dnsmasq.sh || chmod +x /opt/bin/unblock_dnsmasq.sh
     sed -i "s/40500/${dnsovertlsport}/g" /opt/bin/unblock_dnsmasq.sh
@@ -138,19 +104,16 @@ if [ "$1" = "-install" ]; then
     echo "Установлен скрипт для формирования дополнительного конфигурационного файла dnsmasq из заданного списка доменов и его запуск"
 
     # unblock_update.sh
-    # chmod 777 /opt/bin/unblock_update.sh || rm -rfv /opt/bin/unblock_update.sh
     curl -o /opt/bin/unblock_update.sh https://raw.githubusercontent.com/${repo}/bypass_keenetic/main/unblock_update.sh
     chmod 755 /opt/bin/unblock_update.sh || chmod +x /opt/bin/unblock_update.sh
     echo "Установлен скрипт ручного принудительного обновления системы после редактирования списка доменов"
 
     # s99unblock
-    # chmod 777 /opt/etc/init.d/S99unblock || rm -Rfv /opt/etc/init.d/S99unblock
     curl -o /opt/etc/init.d/S99unblock https://raw.githubusercontent.com/${repo}/bypass_keenetic/main/S99unblock
     chmod 755 /opt/etc/init.d/S99unblock || chmod +x /opt/etc/init.d/S99unblock
     echo "Установлен cкрипт автоматического заполнения множества unblock при загрузке маршрутизатора"
 
     # 100-redirect.sh
-    # chmod 777 /opt/etc/ndm/netfilter.d/100-redirect.sh || rm -rfv /opt/etc/ndm/netfilter.d/100-redirect.sh
     curl -o /opt/etc/ndm/netfilter.d/100-redirect.sh https://raw.githubusercontent.com/${repo}/bypass_keenetic/main/100-redirect.sh
     chmod 755 /opt/etc/ndm/netfilter.d/100-redirect.sh || chmod +x /opt/etc/ndm/netfilter.d/100-redirect.sh
     sed -i "s/hash:net/${set_type}/g" /opt/etc/ndm/netfilter.d/100-redirect.sh
@@ -160,7 +123,6 @@ if [ "$1" = "-install" ]; then
     echo "Установлено перенаправление пакетов с адресатами из unblock в: Shadowsocks, xray, VPN"
 
     # VPN script
-    # chmod 777 /opt/etc/ndm/ifstatechanged.d/100-unblock-vpn.sh || rm -rfv /opt/etc/ndm/ifstatechanged.d/100-unblock-vpn.sh
     if [ "${keen_os_short}" = "4" ]; then
       echo "VPN для KeenOS 4+";
       curl -s -o /opt/etc/ndm/ifstatechanged.d/100-unblock-vpn.sh https://raw.githubusercontent.com/${repo}/bypass_keenetic/main/100-unblock-vpn-v4.sh
@@ -171,12 +133,10 @@ if [ "$1" = "-install" ]; then
       echo "Your really KeenOS ???";
       curl -s -o /opt/etc/ndm/ifstatechanged.d/100-unblock-vpn.sh https://raw.githubusercontent.com/${repo}/bypass_keenetic/main/100-unblock-vpn.sh
     fi
-    #curl -o /opt/etc/ndm/ifstatechanged.d/100-unblock-vpn.sh https://raw.githubusercontent.com/${repo}/bypass_keenetic/main/100-unblock-vpn.sh
     chmod 755 /opt/etc/ndm/ifstatechanged.d/100-unblock-vpn.sh || chmod +x /opt/etc/ndm/ifstatechanged.d/100-unblock-vpn.sh
     echo "Установлен скрипт проверки подключения и остановки VPN"
 
     # dnsmasq.conf
-    #rm -rf /opt/etc/dnsmasq.conf
     chmod 777 /opt/etc/dnsmasq.conf || rm -rfv /opt/etc/dnsmasq.conf
     curl -o /opt/etc/dnsmasq.conf https://raw.githubusercontent.com/${repo}/bypass_keenetic/main/dnsmasq.conf
     chmod 755 /opt/etc/dnsmasq.conf
@@ -186,21 +146,12 @@ if [ "$1" = "-install" ]; then
     echo "Установлена настройка dnsmasq и подключение дополнительного конфигурационного файла к dnsmasq"
 
     # cron file
-    #rm -rf /opt/etc/crontab
     chmod 777 /opt/etc/crontab || rm -Rfv /opt/etc/crontab
     curl -o /opt/etc/crontab https://raw.githubusercontent.com/${repo}/bypass_keenetic/main/crontab
     chmod 755 /opt/etc/crontab
     echo "Установлено добавление задачи в cron для периодического обновления содержимого множества"
     /opt/bin/unblock_update.sh
     echo "Установлены все изначальные скрипты и скрипты разблокировок, выполнена основная настройка бота"
-
-    #ndmc -c 'opkg dns-override'
-    #sleep 3
-    #ndmc -c 'system configuration save'
-    #sleep 3
-    #echo "Перезагрузка роутера"
-    #ndmc -c 'system reboot'
-    #sleep 5
 
     exit 0
 fi
