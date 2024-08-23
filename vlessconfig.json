@@ -1,16 +1,14 @@
 {
+    "log": {
+        "loglevel": "none"
+    },
     "dns": {
         "disableFallback": true,
         "servers": [
             {
-                "address": "https://8.8.8.8/dns-query",
-                "domains": [],
-                "queryStrategy": ""
-            },
-            {
                 "address": "localhost",
                 "domains": [],
-                "queryStrategy": ""
+                "queryStrategy": "UseIPv4"
             }
         ],
         "tag": "dns"
@@ -27,7 +25,8 @@
             "sniffing": {
                 "enabled": true,
                 "destOverride": ["http", "tls"]
-            }
+            },
+            "tag": "dokodemo-in"
         },
         {
             "listen": "127.0.0.1",
@@ -42,13 +41,14 @@
             "tag": "http-in"
         }
     ],
-    "log": {
-        "loglevel": "warning"
-    },
     "outbounds": [
         {
-            "domainStrategy": "AsIs",
-            "flow": null,
+            "mux": {
+                "concurrency": -1,
+                "enabled": false,
+                "xudpConcurrency": 8,
+                "xudpProxyUDP443": ""
+            },
             "protocol": "vless",
             "settings": {
                 "vnext": [
@@ -58,8 +58,10 @@
                         "users": [
                             {
                                 "encryption": "none",
-                                "flow": "{{{xtls-rprx-vision}}}",
-                                "id": "{{{ID}}}"
+                                "flow": "xtls-rprx-vision",
+                                "id": "{{{ID}}}",
+                                "level": 8,
+                                "security": "auto"
                             }
                         ]
                     }
@@ -68,71 +70,22 @@
             "streamSettings": {
                 "network": "tcp",
                 "realitySettings": {
-                    "fingerprint": "{{{chrome}}}",
+                    "allowInsecure": false,
+                    "fingerprint": "chrome",
                     "publicKey": "{{{KEY}}}",
                     "serverName": "{{{SNI}}}",
                     "shortId": "{{{shortId}}}",
+                    "show": false,
                     "spiderX": "{{{/spiderX}}}"
                 },
-                "security": "reality"
+                "security": "reality",
+                "tcpSettings": {
+                    "header": {
+                        "type": "none"
+                    }
+                }
             },
             "tag": "proxy"
-        },
-        {
-            "domainStrategy": "",
-            "protocol": "freedom",
-            "tag": "direct"
-        },
-        {
-            "domainStrategy": "",
-            "protocol": "freedom",
-            "tag": "bypass"
-        },
-        {
-            "protocol": "blackhole",
-            "tag": "block"
-        },
-        {
-            "protocol": "dns",
-            "proxySettings": {
-                "tag": "proxy",
-                "transportLayer": true
-            },
-            "settings": {
-                "address": "8.8.8.8",
-                "network": "tcp",
-                "port": 53,
-                "userLevel": 1
-            },
-            "tag": "dns-out"
         }
-    ],
-    "policy": {
-        "levels": {
-            "1": {
-                "connIdle": 30
-            }
-        },
-        "system": {
-            "statsOutboundDownlink": true,
-            "statsOutboundUplink": true
-        }
-    },
-    "routing": {
-        "domainStrategy": "AsIs",
-        "rules": [
-            {
-                "inboundTag": ["socks-in", "http-in"],
-                "outboundTag": "dns-out",
-                "port": "53",
-                "type": "field"
-            },
-            {
-                "outboundTag": "proxy",
-                "port": "0-65535",
-                "type": "field"
-            }
-        ]
-    },
-    "stats": {}
+    ]
 }
